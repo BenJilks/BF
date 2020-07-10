@@ -1,4 +1,6 @@
 
+let global_temp
+
 def output(x) { goto x `.` }
 def input(x) { goto x `,` }
 def inc(x) { goto x `+` }
@@ -35,11 +37,10 @@ def duplicate(x, a, b) {
 }
 
 def copy(a, b) {
-	let copy_temp
-	reset(copy_temp)
+	reset(global_temp)
 
-	duplicate(a, b, copy_temp)
-	move(copy_temp, a)
+	duplicate(a, b, global_temp)
+	move(global_temp, a)
 }
 
 def sub(a, b) {
