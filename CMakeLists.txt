@@ -4,8 +4,7 @@ project(bf)
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(SOURCES
-    main.cpp
-)
 
-add_executable(bf ${SOURCES})
+add_executable(bfc compiler.cpp)
+add_executable(bf interpreter.cpp)
+

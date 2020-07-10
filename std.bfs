@@ -1,0 +1,160 @@
+
+def output(x) { goto x `.` }
+def input(x) { goto x `,` }
+def inc(x) { goto x `+` }
+def dec(x) { goto x `-` }
+
+def reset(x) {
+	goto x
+	`[-]`
+}
+
+def drain(x, do) {
+	goto x 
+	`[` do dec(x) `]`
+}
+
+def while(x, do) {
+	goto x `[`
+		do
+		goto x
+	`]`
+}
+
+def move(a, b) {
+	drain(a, {
+		inc(b)
+	})
+}
+
+def duplicate(x, a, b) {
+	drain(x, {
+		inc(a)
+		inc(b)
+	})
+}
+
+def copy(a, b) {
+	let copy_temp
+	reset(copy_temp)
+
+	duplicate(a, b, copy_temp)
+	move(copy_temp, a)
+}
+
+def sub(a, b) {
+	let sub_temp
+	reset(sub_temp)
+
+	copy(a, sub_temp)
+	drain(sub_temp, {
+		dec(b)
+	})
+}
+
+def set_array_element(arr, ptr, value) {
+	copy(ptr, arr[1])
+	copy(ptr, arr[2])
+	copy(value, arr[3])
+	goto arr[0]
+	`>[>>>[-<<<<+>>>>]<[->+<]<[->+<]<[->+<]>-]>>>[-]<[->+<]<[[-<+>]<<<[->>>>+<<<<]>>-]<<`
+}
+
+def get_array_element(arr, ptr, value) {
+	copy(ptr, arr[1])
+	copy(ptr, arr[2])
+	reset(arr[3])
+	goto arr[0]
+	`>[>>>[-<<<<+>>>>]<<[->+<]<[->+<]>-]>>>[-<+<<+>>>]<<<[->>>+<<<]>[[-<+>]>[-<+>]<<<<[->>>>+<<<<]>>-]<<`
+	move(arr[3], value)
+}
+
+def sub_value(x, value) {
+	goto x
+	for i in value {
+		dec(x)
+	}
+}
+
+def if(x, do) {
+	let if_temp
+	reset(if_temp)
+	copy(x, if_temp)
+
+	goto if_temp `[`
+		do
+		reset(if_temp)
+	`]`
+}
+
+def is_equals(a, b, result) {
+	let ie_temp_a
+	let ie_temp_b
+	reset(ie_temp_a)
+	reset(ie_temp_b)
+	reset(result)
+
+	inc(result)
+	copy(a, ie_temp_a)
+	drain(b, {
+		dec(ie_temp_a)
+		inc(ie_temp_b)
+	})
+	drain(ie_temp_b, {
+		inc(b)
+	})
+
+	goto ie_temp_a `[`
+		dec(result)
+		reset(ie_temp_a)
+	`]`
+}
+
+def if_equals(a, b, do) {
+	let should_run
+	is_equals(a, b, should_run)
+
+	drain(should_run, {
+		do
+	})
+}
+
+def if_equals_value(x, value, do) {
+	let should_run, iev_temp
+	reset(should_run)
+	inc(should_run)
+
+	copy(x, iev_temp)
+	goto iev_temp unload value
+	while(iev_temp, {
+		dec(should_run)
+		reset(iev_temp)
+	})
+	
+	drain(should_run, {
+		do
+	})
+}
+
+def if_equals_else(a, b, do, else) {
+	let should_run
+	let should_run_else
+	reset(should_run_else)
+	is_equals(a, b, should_run)
+
+	inc(should_run_else)
+	drain(should_run, {
+		do
+		dec(should_run_else)
+	})
+	drain(should_run_else, {
+		else
+	})
+}
+
+def assign(x, value) {
+	reset(x)
+	goto x
+	load value
+}
+
