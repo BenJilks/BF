@@ -2,6 +2,7 @@
 let count, should_continue, out
 let src_ptr, mem_ptr, cell
 let temp0, temp1, temp2, temp3
+let depth, temp4, temp5
 let stack[10]
 let source[20]
 
@@ -40,14 +41,40 @@ while(should_continue, {
 		get_array_element_using_temps(source, mem_ptr, cell, temp2)
 	}, temp0, temp1)
 	if_equals_value_using_temps(out, '[', {
-		push_stack_using_temps(stack, src_ptr, temp2)
+		copy_using_temps(cell, temp2, temp3)
+		inc(temp3)
+		if_discarding(temp2, {
+			push_stack_using_temps(stack, src_ptr, temp3)
+			reset(temp3)
+		})
+		if_discarding(temp3, {
+			inc(depth)
+			while(depth, {
+				inc(src_ptr)
+				reset(out)
+				get_array_element_using_temps(source, src_ptr, out, temp2)
+				if_equals_value_using_temps(out, '[', {
+					inc(depth)
+				}, temp4, temp5)
+				if_equals_value_using_temps(out, ']', {
+					dec(depth)
+				}, temp4, temp5)
+			})
+			reset(temp2)
+			reset(out)
+		})
 	}, temp0, temp1)
 	if_equals_value_using_temps(out, ']', {
 		copy_using_temps(cell, temp2, temp3)
+
+		inc(temp3)
 		if_discarding(temp2, {
 			reset(src_ptr)
 			copy_top_of_stack(stack, src_ptr)
-			reset(temp2)
+			dec(temp3)
+		})
+		if_discarding(temp3, {
+			pop_stack_discarding(stack)
 		})
 	}, temp0, temp1)
 

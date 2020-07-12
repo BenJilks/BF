@@ -133,6 +133,12 @@ def pop_stack(stack, value) {
 	move(stack[0], value)
 }
 
+def pop_stack_discarding(stack, value) {
+	goto stack[0]
+	`>->[<<+>>-]>+[-[<+>-]>+]<-<+[-<+]<`
+	reset(stack[0])
+}
+
 def copy_top_of_stack(stack, value) {
 	copy_using_temps(stack[2], value, stack[0])
 }
