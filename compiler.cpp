@@ -533,6 +533,21 @@ void compile(std::ostream &out, const std::vector<NodeStatement> &program)
 		assert(false);
 	};
 
+	int column = 0;
+	auto output_str = [&](const std::string &str)
+	{
+		for (char c : str)
+		{
+			if (column >= 80)
+			{
+				out << "\n";
+				column = 0;
+			}
+			out << c;
+			column += 1;
+		}
+	};
+
 	int curr_pointer = 0;
 	std::function<void(const std::vector<NodeStatement>&, Scope*)> compile_scope;
 	compile_scope = [&](const std::vector<NodeStatement> &statements, Scope *parent)
@@ -546,12 +561,12 @@ void compile(std::ostream &out, const std::vector<NodeStatement> &program)
 			if (pos < curr_pointer)
 			{
 				for (int i = pos; i < curr_pointer; i++)
-					out << "<";
+					output_str("<");
 			}
 			else if (pos > curr_pointer)
 			{
 				for (int i = curr_pointer; i < pos; i++)
-					out << ">";
+					output_str(">");
 			}
 			curr_pointer = pos;
 		};
@@ -576,7 +591,7 @@ void compile(std::ostream &out, const std::vector<NodeStatement> &program)
 
 				case NodeStatement::Source:
 				{
-					out << statement.operand;
+					output_str(statement.operand);
 					break;
 				}
 
@@ -589,14 +604,14 @@ void compile(std::ostream &out, const std::vector<NodeStatement> &program)
 				case NodeStatement::Load:
 				{
 					for (int i = 0; i < statement.operand[0]; i++)
-						out << "+";
+						output_str("+");
 					break;
 				}
 
 				case NodeStatement::Unload:
 				{
 					for (int i = 0; i < statement.operand[0]; i++)
-						out << "-";
+						output_str("-");
 					break;
 				}
 
@@ -605,7 +620,7 @@ void compile(std::ostream &out, const std::vector<NodeStatement> &program)
 				{
 					auto temp_pos = scope.allocator;
 					goto_pos(temp_pos);
-					out << "[-]";
+					output_str("[-]");
 
 					int curr_value = 0;
 					for (char target : statement.operand)
@@ -613,18 +628,18 @@ void compile(std::ostream &out, const std::vector<NodeStatement> &program)
 						if (target < curr_value)
 						{
 							for (int i = target; i < curr_value; i++)
-								out << "-";
+								output_str("-");
 						}
 						else if (target > curr_value)
 						{
 							for (int i = curr_value; i < target; i++)
-								out << "+";
+								output_str("+");
 						}
 
-						out << ".";
+						output_str(".");
 						curr_value = target;
 					}
-					out << "[-]";
+					output_str("[-]");
 					break;
 				}
 
