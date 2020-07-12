@@ -1,0 +1,59 @@
+
+let count, should_continue, out
+let src_ptr, mem_ptr, cell
+let temp0, temp1, temp2, temp3
+let stack[10]
+let source[20]
+
+setup_stack(stack)
+size_tracked_char_terminated_load(source, count)
+copy_using_temps(count, mem_ptr, temp0)
+inc(mem_ptr)
+
+inc(should_continue)
+while(should_continue, {
+	reset(out)
+	get_array_element_using_temps(source, src_ptr, out, temp0)
+
+	if_equals_value_using_temps(out, '+', {
+		inc(cell)
+	}, temp0, temp1)
+	if_equals_value_using_temps(out, '-', {
+		dec(cell)
+	}, temp0, temp1)
+	if_equals_value_using_temps(out, ',', {
+		input(cell)
+	}, temp0, temp1)
+	if_equals_value_using_temps(out, '.', {
+		output(cell)
+	}, temp0, temp1)
+	if_equals_value_using_temps(out, '>', {
+		set_array_element_using_temps(source, mem_ptr, cell, temp2)
+		reset(cell)
+		inc(mem_ptr)
+		get_array_element_using_temps(source, mem_ptr, cell, temp2)
+	}, temp0, temp1)
+	if_equals_value_using_temps(out, '<', {
+		set_array_element_using_temps(source, mem_ptr, cell, temp2)
+		reset(cell)
+		dec(mem_ptr)
+		get_array_element_using_temps(source, mem_ptr, cell, temp2)
+	}, temp0, temp1)
+	if_equals_value_using_temps(out, '[', {
+		push_stack_using_temps(stack, src_ptr, temp2)
+	}, temp0, temp1)
+	if_equals_value_using_temps(out, ']', {
+		copy_using_temps(cell, temp2, temp3)
+		if_discarding(temp2, {
+			reset(src_ptr)
+			copy_top_of_stack(stack, src_ptr)
+			reset(temp2)
+		})
+	}, temp0, temp1)
+
+	inc(src_ptr)
+	if_equals_using_temps(count, src_ptr, {
+		dec(should_continue)
+	}, temp0, temp1, temp2)
+})
+

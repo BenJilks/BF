@@ -213,7 +213,6 @@ NodeProgram parse(std::string in)
 			NodeStatement let;
 			let.type = NodeStatement::Let;
 			let.operand = parse_let_name();
-			program.statements.push_back(let);
 	
 			auto name = let.operand;
 			if (peek() == '[')
@@ -226,6 +225,10 @@ NodeProgram parse(std::string in)
 					let.operand = name + "[" + std::to_string(i) + "]";
 					program.statements.push_back(let);
 				}
+			}
+			else
+			{
+				program.statements.push_back(let);
 			}
 		};
 

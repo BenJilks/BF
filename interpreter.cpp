@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <unistd.h>
 
 int main(int argc, char *argv[])
 {
@@ -12,18 +13,49 @@ int main(int argc, char *argv[])
 	auto source = stream.str();
 	auto input = std::string(argv[1]);
 
-	char memory[256];
+	unsigned char memory[256];
 	int memory_ptr = 0;
 	int source_ptr = 0;
 	int input_ptr = 0;
+	int max_mem_use = 0;
 	std::vector<int> loop_stack;
+	memset(memory, 0, sizeof(memory));
+
+	auto dump_state = [&]()
+	{
+		static constexpr int row_size = 20;
+		for (int row = 0; row < (max_mem_use / row_size) + 1; row++)
+		{
+			auto index = row * row_size;
+			for (int i = index; i < std::min(index + row_size, max_mem_use); i++)
+				printf("%4u ", memory[i]);
+			std::cout << "\n";
+			for (int i = index; i < std::min(index + row_size, max_mem_use); i++)
+				printf("%4s ", i == memory_ptr ? "^" : " ");
+			std::cout << "\n";
+		}
+		std::cout << "\n";
+	};
+
 	while (source_ptr < source.size())
 	{
+#if 0
+		dump_state();
+		usleep(10000);
+#endif
+
 		char op = source[source_ptr++];
 		switch (op)
 		{
+#if 1
+			case '$':
+				dump_state();
+				sleep(1);
+				break;
+#endif
 			case '>':
 				memory_ptr += 1;
+				max_mem_use = std::max(max_mem_use, memory_ptr + 1);
 				break;
 			case '<':
 				memory_ptr -= 1;
@@ -36,12 +68,13 @@ int main(int argc, char *argv[])
 				break;
 			case '.':
 				std::cout << memory[memory_ptr];
+				std::cout.flush();
 				break;
 			case ',':
 				if (input_ptr < input.size())
 					memory[memory_ptr] = input[input_ptr++];
 				else
-					source_ptr = source.size();
+					memory[memory_ptr] = 0;
 				break;
 			case '[':
 				if (memory[memory_ptr] == 0)
@@ -76,5 +109,6 @@ int main(int argc, char *argv[])
 	}
 
 	std::cout << "\n";
+	dump_state();
 	return 0;
 }

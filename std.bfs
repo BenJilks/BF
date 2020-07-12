@@ -1,10 +1,14 @@
 
-let global_temp
-
 def output(x) { goto x `.` }
 def input(x) { goto x `,` }
 def inc(x) { goto x `+` }
 def dec(x) { goto x `-` }
+
+def inc_by(x, by) {
+	for i in by {
+		inc(x)
+	}
+}
 
 def reset(x) {
 	goto x
@@ -36,61 +40,104 @@ def duplicate(x, a, b) {
 	})
 }
 
-def copy(a, b) {
-	reset(global_temp)
-
-	duplicate(a, b, global_temp)
-	move(global_temp, a)
-}
-
-def sub(a, b) {
-	let sub_temp
-	reset(sub_temp)
-
-	copy(a, sub_temp)
-	drain(sub_temp, {
-		dec(b)
+def triple_move(x, a, b, c) {
+	drain(x, {
+		inc(a)
+		inc(b)
+		inc(c)
 	})
 }
 
-def set_array_element(arr, ptr, value) {
-	copy(ptr, arr[1])
-	copy(ptr, arr[2])
-	copy(value, arr[3])
+def copy(a, b) {
+	let copy_temp
+	reset(copy_temp)
+
+	duplicate(a, b, copy_temp)
+	move(copy_temp, a)
+}
+
+def double_copy_using_temps(x, a, b, copy_temp)
+{
+	reset(copy_temp)
+	triple_move(x, a, b, copy_temp)
+	move(copy_temp, x)
+}
+
+def copy_using_temps(a, b, copy_temp) {
+	reset(copy_temp)
+
+	duplicate(a, b, copy_temp)
+	move(copy_temp, a)
+}
+
+def null_terminated_load(arr) {
+	goto arr[3]
+	`-[>,]<+[-<+]`
+}
+
+def char_terminated_load(arr) {
+	goto arr[3]
+	`->+++[<----------->-]<[+>++++[<++++++++>-],->++++[<-------->-]<]`
+	`<+[-.<+]`
+}
+
+def size_tracked_char_terminated_load(arr, size) {
+	goto arr[0]
+	`>->+++[<----------->-]<[+>++++[<++++++++>-],->++++[<-------->-]<]`
+	`+<+[-[>>+<<-]>[<+>-]<+<+]<`
+	dec(arr[2])
+	move(arr[2], size)
+}
+
+def size_tracked_null_terminated_load(arr, size) {
+	goto arr[0]
+	`>-[>,]+<+[-[>>+<<-]>[<+>-]<+<+]<`
+	dec(arr[2])
+	move(arr[2], size)
+}
+
+def set_array_element_using_temps(arr, ptr, value, sae_temp) {
+	double_copy_using_temps(ptr, arr[1], arr[2], sae_temp)
+	copy_using_temps(value, arr[3], sae_temp)
 	goto arr[0]
 	`>[>>>[-<<<<+>>>>]<[->+<]<[->+<]<[->+<]>-]>>>[-]<[->+<]<[[-<+>]<<<[->>>>+<<<<]>>-]<<`
 }
 
-def get_array_element(arr, ptr, value) {
-	copy(ptr, arr[1])
-	copy(ptr, arr[2])
+def get_array_element_using_temps(arr, ptr, value, gae_temp) {
+	double_copy_using_temps(ptr, arr[1], arr[2], gae_temp)
 	reset(arr[3])
 	goto arr[0]
 	`>[>>>[-<<<<+>>>>]<<[->+<]<[->+<]>-]>>>[-<+<<+>>>]<<<[->>>+<<<]>[[-<+>]>[-<+>]<<<<[->>>>+<<<<]>>-]<<`
 	move(arr[3], value)
 }
 
-def sub_value(x, value) {
-	goto x
-	for i in value {
-		dec(x)
-	}
+def setup_stack(stack) {
+	dec(stack[2])
 }
 
-def if(x, do) {
-	let if_temp
-	reset(if_temp)
-	copy(x, if_temp)
-
-	goto if_temp `[`
-		do
-		reset(if_temp)
-	`]`
+def move_onto_stack(stack, value) {
+	move(value, stack[0])
+	goto stack[0]
+	`>->+[->+]>-<<+[-[>+<-]<+]<[>>+<<-]`
 }
 
-def is_equals(a, b, result) {
-	let ie_temp_a
-	let ie_temp_b
+def push_stack_using_temps(stack, value, push_temp) {
+	copy_using_temps(value, stack[0], push_temp)
+	goto stack[0]
+	`>->+[->+]>-<<+[-[>+<-]<+]<[>>+<<-]`
+}
+
+def pop_stack(stack, value) {
+	goto stack[0]
+	`>->[<<+>>-]>+[-[<+>-]>+]<-<+[-<+]<`
+	move(stack[0], value)
+}
+
+def copy_top_of_stack(stack, value) {
+	copy_using_temps(stack[2], value, stack[0])
+}
+
+def is_equals_using_temps(a, b, result, ie_temp_a, ie_temp_b) {
 	reset(ie_temp_a)
 	reset(ie_temp_b)
 	reset(result)
@@ -112,20 +159,35 @@ def is_equals(a, b, result) {
 }
 
 def if_equals(a, b, do) {
-	let should_run
-	is_equals(a, b, should_run)
+	let should_run, ie_temp_a, ie_temp_b
+	is_equals_using_temps(a, b, should_run, ie_temp_a, ie_temp_b)
 
 	drain(should_run, {
 		do
 	})
 }
 
-def if_equals_value(x, value, do) {
-	let should_run, iev_temp
+def if_equals_using_temps(a, b, do, ie_temp_a, ie_temp_b, should_run) {
+	is_equals_using_temps(a, b, should_run, ie_temp_a, ie_temp_b)
+	drain(should_run, {
+		do
+	})
+}
+
+def if_discarding(x, do) {
+	goto x `[`
+		do
+		reset(x)
+	`]`
+}
+
+def if_equals_value_using_temps(x, value, do, should_run, iev_temp) {
+	reset(iev_temp)
+
+	copy_using_temps(x, iev_temp, should_run)
 	reset(should_run)
 	inc(should_run)
 
-	copy(x, iev_temp)
 	goto iev_temp unload value
 	while(iev_temp, {
 		dec(should_run)
@@ -135,6 +197,11 @@ def if_equals_value(x, value, do) {
 	drain(should_run, {
 		do
 	})
+}
+
+def if_equals_value(x, value, do) {
+	let should_run, iev_temp
+	if_equals_value_using_temps(x, value, do, should_run, iev_temp)
 }
 
 def if_equals_else(a, b, do, else) {
@@ -151,11 +218,5 @@ def if_equals_else(a, b, do, else) {
 	drain(should_run_else, {
 		else
 	})
-}
-
-def assign(x, value) {
-	reset(x)
-	goto x
-	load value
 }
 
