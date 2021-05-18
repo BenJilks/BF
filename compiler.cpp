@@ -656,10 +656,20 @@ void compile(std::ostream &out, const std::vector<NodeStatement> &program)
 	out << "\n";
 }
 
-int main()
+int main(int argc, char *argv[])
 {
     std::stringstream stream;
+
+#if 0
+    if (argc < 2)
+        return 1;
+
+    std::ifstream file(argv[1]);
+    stream << file.rdbuf();
+#else
     stream << std::cin.rdbuf();
+#endif
+    
     auto source = stream.str();
     auto program = apply_defs(parse(source));
 

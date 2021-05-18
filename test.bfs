@@ -1,0 +1,11 @@
+
+let x[5]
+let count
+
+inc(count)
+while(count, {
+    inc_short(x)
+    output(x[0])
+    output(x[4])
+})
+

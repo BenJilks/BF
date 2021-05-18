@@ -96,6 +96,20 @@ def size_tracked_null_terminated_load(arr, size) {
 	move(arr[2], size)
 }
 
+def inc_short(s) {
+    goto s[0]
+    `>+<+[>]>[>>>+<]<<-<`
+}
+
+def unused() {
+
+    goto temp
+    `[`
+        dec(s[0])
+        inc(temp)
+    `]`
+}
+
 def set_array_element_using_temps(arr, ptr, value, sae_temp) {
 	double_copy_using_temps(ptr, arr[1], arr[2], sae_temp)
 	copy_using_temps(value, arr[3], sae_temp)

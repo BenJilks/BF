@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <cstring>
 #include <unistd.h>
 
 int main(int argc, char *argv[])
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 				memory[memory_ptr] -= 1;
 				break;
 			case '.':
-				std::cout << memory[memory_ptr];
+				std::cout << (int)memory[memory_ptr] << "\n";
 				std::cout.flush();
 				break;
 			case ',':
