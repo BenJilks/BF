@@ -101,6 +101,11 @@ def inc_short(s) {
     `>+<+[>]>[>>>+<]<<-<`
 }
 
+def dec_short(s) {
+    goto s[0]
+    `>+<[>]>[>>>-<]<<-<-`
+}
+
 def unused() {
 
     goto temp

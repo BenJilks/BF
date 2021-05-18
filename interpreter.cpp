@@ -110,6 +110,6 @@ int main(int argc, char *argv[])
 	}
 
 	std::cout << "\n";
-	dump_state();
+	//dump_state();
 	return 0;
 }

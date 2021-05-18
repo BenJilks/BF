@@ -1,10 +1,14 @@
 
 let x[5]
-let count
 
-inc(count)
-while(count, {
-    inc_short(x)
+inc_by(x[4], 2)
+inc_by(x[0], 5)
+
+let count
+inc_by(count, 7)
+
+drain(count, {
+    dec_short(x)
     output(x[0])
     output(x[4])
 })
