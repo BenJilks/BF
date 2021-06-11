@@ -4,6 +4,8 @@ def input(x) { goto x `,` }
 def inc(x) { goto x `+` }
 def dec(x) { goto x `-` }
 
+def break() { `*` }
+
 def inc_by(x, by) {
 	for i in by {
 		inc(x)
@@ -83,8 +85,8 @@ def char_terminated_load(arr) {
 
 def size_tracked_char_terminated_load(arr, size) {
 	goto arr[0]
-	`>->+++[<----------->-]<[+>++++[<++++++++>-],->++++[<-------->-]<]`
-	`+<+[-[>>+<<-]>[<+>-]<+<+]<`
+	`>->+++[<----------->-]<[+>++++[<++++++++>-],->++++[<-------->-]<*]`
+	`+<+[-[>>+<<-]>[<+>-]<+<+*]<`
 	dec(arr[2])
 	move(arr[2], size)
 }
@@ -96,9 +98,55 @@ def size_tracked_null_terminated_load(arr, size) {
 	move(arr[2], size)
 }
 
+def inc_current_short()
+{
+    `>+<+[>]>[>>>+<]<<-<`
+}
+
+def move_head_left(head_size)
+{
+    for i in head_size {
+        `[-<+>]>`
+    }
+    for i in head_size {
+        `<`
+    }
+    `<`
+}
+
+def short_size_tracked_char_terminated_load(arr, size) {
+	goto arr[0]
+
+    # Load into memory
+	`->+++[<----------->-]<[+>++++[<++++++++>-],->++++[<-------->-]<]` 
+
+    break()
+
+    `<+[-`
+        # Add one to our size count
+        `>`
+        inc_current_short() 
+
+        # Move the element before our head to after it
+        `<[->>>>>>+<<<<<<]>` 
+
+        # Move our head down one
+        move_head_left(5)
+        
+        `<+`
+    `]`
+}
+
+def copy_array(src, dest, size, temp)
+{
+    for i in size {
+        copy_using_temp(src[i], dest[i], temp)
+    }
+}
+
 def inc_short(s) {
     goto s[0]
-    `>+<+[>]>[>>>+<]<<-<`
+    inc_current_short()
 }
 
 def dec_short(s) {

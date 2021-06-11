@@ -377,12 +377,20 @@ NodeProgram parse(std::string in)
         program.statements.push_back(print);
     };
 
+    auto parse_comment = [&]()
+    {
+        while (consume() != '\n')
+            continue;
+    };
+
     for (;;)
     {
         if (!peek() || peek() == -1)
             break;
         else if (isspace(peek()))
             consume();
+        else if (peek() == '#')
+            parse_comment();
         else if (is_string_next("def"))
             parse_def();
         else if (is_string_next("let"))

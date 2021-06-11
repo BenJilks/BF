@@ -1,15 +1,8 @@
 
+let size
 let x[5]
 
-inc_by(x[4], 2)
-inc_by(x[0], 5)
+short_size_tracked_char_terminated_load(x, size)
 
-let count
-inc_by(count, 7)
-
-drain(count, {
-    dec_short(x)
-    output(x[0])
-    output(x[4])
-})
+break()
 
